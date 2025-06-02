@@ -6,6 +6,7 @@ public class Cpt {
         Console con = new Console();
 
         int intChoice = 0;
+        String strPlayerName;
 
         while (intChoice != 4) {
             con.println("===== Word Guessing Game =====");
@@ -15,6 +16,14 @@ public class Cpt {
             con.println("4. Quit");
             con.println("Choose an option: ");
             intChoice = con.readInt();
+     
+            
+            
+            if (intChoice == 1) {
+                con.print("Enter your name: ");
+                strPlayerName = con.readLine();
+               }
+
          }
            
       }
