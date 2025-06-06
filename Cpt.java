@@ -1,48 +1,96 @@
 import arc.*;
 
 public class Cpt {
-
     public static void main(String[] args) {
         Console con = new Console();
 
-        int intChoice = 0;
-        String strPlayerName;
-        int intWord;
+        String themeName;
+        String word = "";
+        String shownWord = "";
+        int wordLength;
+        int points;
+        boolean isComplete = false;
+        String userInput;
+        char guessedLetter;
+        String newShownWord;
+        boolean found;
+        int letter;
+        char realLetter;
+        char currentLetter;
 
-        while (intChoice != 4) {
-            con.println("===== Word Guessing Game =====");
-            con.println("1. Play Game");
-            con.println("2. View Leaderboard");
-            con.println("3. Add Quiz");
-            con.println("4. Quit");
-            con.println("Choose an option: ");
-            intChoice = con.readInt();
-     
-            
-            //Saves the name to the leaderboard
-            if (intChoice == 1) {
-                con.print("Enter your name: ");
-                strPlayerName = con.readLine();
-                length();
-                while (points > 0) {
-                    // Show dashes or letters, if wrong then lose points but add dash if correct remove
-                    con.print("Word: ");
-                    boolean allGuessed = true;
-                    for (int intWord = 0; intWord < word.length(); intWord++) {
-                        if (guessed[intWord]) {
-                            con.print(word.charAt(intWord));
-                        } else {
-                            con.print("-");
-                            allGuessed = false;
-                        }
-                    }
+        // Ask for theme name
+        con.print("Enter theme name (food, space, sports): ");
+        themeName = con.readLine();
 
-		   }
-	
-	
+        // Use hardcoded words instead of reading from file
+        if (themeName.equals("food")) {
+            word = "pizza";
+        } else if (themeName.equals("space")) {
+            word = "galaxy";
+        } else if (themeName.equals("sports")) {
+            word = "soccer";
+        } else {
+            word = "banana"; // default fallback word
+            con.println("Unknown theme. Using default word.");
+        }
+
+        wordLength = word.length();
+        points = wordLength;
+
+        // Fill shownWord with dashes
+        for (letter = 0; letter < wordLength; letter++) {
+            shownWord += "-";
+        }
+
+        while (points > 0 && !isComplete) {
+            con.println("Word: " + shownWord);
+            con.println("Points left: " + points);
+            con.print("Guess a letter: ");
+            userInput = con.readLine();
+
+            if (userInput.length() != 1) {
+                con.println("Enter just one letter!");
+                continue;
+            }
+
+            guessedLetter = userInput.charAt(0);
+            newShownWord = "";
+            found = false;
+
+            for (letter = 0; letter < wordLength; letter++) {
+                realLetter = word.charAt(letter);
+                currentLetter = shownWord.charAt(letter);
+
+                if (currentLetter != '-') {
+                    newShownWord += currentLetter;
+                } else if (realLetter == guessedLetter) {
+                    newShownWord += guessedLetter;
+                    found = true;
+                } else {
+                    newShownWord += "-";
+                }
+            }
+
+            shownWord = newShownWord;
+
+            if (!found) {
+                points--;
+            }
+
+            if (shownWord.equals(word)) {
+                isComplete = true;
+            }
+        }
+
+        if (isComplete) {
+            con.println("🎉 You guessed it! The word was: " + word);
+        } else {
+            con.println("❌ Out of points! The word was: " + word);
+        }
+
+        con.println("Game over.");
+    }
+}
 
 
-         
-           
-      
 
