@@ -1,38 +1,31 @@
 import arc.*;
 
-public class Cpt {
-    public static void main(String[] args) {
-        Console con = new Console();
+public class Cpt{
+	public static void main (String[] args){
+		Console con = new Console();
 
-        String themeName;
-        String word = "";
-        String shownWord = "";
-        int wordLength;
-        int points;
-        boolean isComplete = false;
-        String userInput;
-        char guessedLetter;
-        String newShownWord;
-        boolean found;
-        int letter;
-        char realLetter;
-        char currentLetter;
+      
+        String themeName;        
+         
+        String word;           
+        String shownWord = "";  
+        int wordLength;           
+        int points;               
+        boolean isComplete = false; 
+        String userInput;        
+        char guessedLetter;       
+        String newShownWord;      
+        boolean found;            // True if guessed letter is in the word
+        int letter;               // Loop variable for going through letters
+        char realLetter;          // The actual letter in the original word
+        char currentLetter;       // The character currently shown (dash or guessed letter)
+        // ============================================
 
-        // Ask for theme name
-        con.print("Enter theme name (food, space, sports): ");
+        // Ask for theme file (e.g., food.txt)
+        con.print("Enter theme name (no .txt): ");
         themeName = con.readLine();
 
-        // Use hardcoded words instead of reading from file
-        if (themeName.equals("food")) {
-            word = "pizza";
-        } else if (themeName.equals("space")) {
-            word = "galaxy";
-        } else if (themeName.equals("sports")) {
-            word = "soccer";
-        } else {
-            word = "banana"; // default fallback word
-            con.println("Unknown theme. Using default word.");
-        }
+   
 
         wordLength = word.length();
         points = wordLength;
@@ -57,17 +50,18 @@ public class Cpt {
             newShownWord = "";
             found = false;
 
+            // Go through the word letter by letter
             for (letter = 0; letter < wordLength; letter++) {
                 realLetter = word.charAt(letter);
                 currentLetter = shownWord.charAt(letter);
 
                 if (currentLetter != '-') {
-                    newShownWord += currentLetter;
+                    newShownWord += currentLetter; // Keep already guessed letters
                 } else if (realLetter == guessedLetter) {
-                    newShownWord += guessedLetter;
+                    newShownWord += guessedLetter; // Correct guess
                     found = true;
                 } else {
-                    newShownWord += "-";
+                    newShownWord += "-"; // Still hidden
                 }
             }
 
@@ -77,6 +71,7 @@ public class Cpt {
                 points--;
             }
 
+            // Check if the word is fully guessed
             if (shownWord.equals(word)) {
                 isComplete = true;
             }
@@ -91,6 +86,3 @@ public class Cpt {
         con.println("Game over.");
     }
 }
-
-
-
