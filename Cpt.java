@@ -1,136 +1,163 @@
 import arc.*;
 
-public class Cpt {
-	public static void main(String[] args) {
-		Console con = new Console();
+public class cpt {
+    public static void main(String[] args) {
+        Console con = new Console();
 
-		// Variables
-		String[] strThemes = new String[5];
-		String[] strWords = new String[5];
-		String strHidden = "";
-		String strGuess;
-		String strAnswer;
-		String strUser;
-		int intTries;
-		int intPoints;
-		int intCount;
-		int intPos;
-		char chrLetter;
-		boolean blnCorrect;
+        // Variables
+        String userChoice;
+        String themeName;
+        String wordToGuess;
+        String guessedDisplay;
+        String guessedLetter;
+        String[] themeList = new String[20];
+        String[] wordList = new String[50];
+        int themeCount;
+        int wordCount;
+        int attemptsLeft;
+        boolean letterFound;
+        
+        while (true) {
+            // Load themes each time before showing menu
+            themeCount = 0;
+            TextInputFile themeInput = new TextInputFile("themes.txt");
+            while (!themeInput.eof()) {
+                themeList[themeCount] = themeInput.readLine();
+                themeCount = themeCount + 1;
+            }
+            themeInput.close();
 
-		// Load theme from file
-		TextInputFile themeFile = new TextInputFile("themes.txt");
-		intCount = 0;
-		while (themeFile.eof() == false && intCount < 5) {
-			strThemes[intCount] = themeFile.readLine();
-			strWords[intCount] = themeFile.readLine();
-			intCount++;
-		}
-		themeFile.close();
+            // Main menu display
+            con.println("\n=== MAIN MENU ===");
+            con.println("1. Play Game");
+            con.println("2. View Leaderboard");
+            con.println("3. Add Theme");
+            con.println("4. Quit");
+            con.print("Enter your choice (1–4): ");
+            userChoice = con.readLine();  // Use readLine for consistency
 
-		// Ask for user name
-		con.print("Enter your name: ");
-		strUser = con.readLine();
+            if (userChoice.equals("1")) {
+                // PLAY GAME
+                if (themeCount == 0) {
+                    con.println("No themes found. Add a theme first!");
+                    continue;
+                }
 
-		boolean blnRunning = true;
-		while (blnRunning) {
-			con.println("\nMain Menu:");
-			con.println("1. Start Game");
-			con.println("2. View Leaderboard");
-			con.println("3. Exit");
-			con.print("Enter your choice: ");
-			int intMenuChoice = con.readInt();
+                // Show available themes
+                con.println("Select a theme:");
+                for (int index = 0; index < themeCount; index = index + 1) {
+                    con.println((index + 1) + ". " + themeList[index]);
+                }
+                con.print("Enter theme number: ");
+                int themeChoice = con.readInt() - 1;
 
-			if (intMenuChoice == 1) {
-				// Pick theme
-				con.println("Choose a theme:");
-				for (int intThemeIndex = 0; intThemeIndex < strThemes.length; intThemeIndex++) {
-					if (strThemes[intThemeIndex] != null) {
-						con.println((intThemeIndex + 1) + ". " + strThemes[intThemeIndex]);
-					}
-				}
-				int intChoice = con.readInt();
-				strAnswer = strWords[intChoice - 1];
+                if (themeChoice < 0 || themeChoice >= themeCount) {
+                    con.println("Invalid theme choice.");
+                    continue;
+                }
 
-				// Initialize hidden word
-				strHidden = "";
-				for (int intCharIndex = 0; intCharIndex < strAnswer.length(); intCharIndex++) {
-					strHidden = strHidden + "_";
-				}
+                themeName = themeList[themeChoice];
+                TextInputFile wordInput = new TextInputFile(themeName + ".txt");
+                wordCount = 0;
+                while (!wordInput.eof()) {
+                    wordList[wordCount] = wordInput.readLine().toLowerCase();
+                    wordCount = wordCount + 1;
+                }
+                wordInput.close();
 
-				intTries = 6;
-				intPoints = 0;
+                if (wordCount == 0) {
+                    con.println("No words found in this theme.");
+                    continue;
+                }
 
-				while (intTries > 0 && strHidden.indexOf("_") != -1) {
-					con.println("Word: " + strHidden);
-					con.print("Guess a letter: ");
-					strGuess = con.readLine();
-					chrLetter = strGuess.charAt(0);
+                // Random word selection
+                int randomIndex = (int)(Math.random() * wordCount);
+                wordToGuess = wordList[randomIndex];
+                guessedDisplay = "";
+                for (int index = 0; index < wordToGuess.length(); index = index + 1) {
+                    guessedDisplay = guessedDisplay + "_";
+                }
 
-					blnCorrect = false;
-					for (int intCharIndex = 0; intCharIndex < strAnswer.length(); intCharIndex++) {
-						if (strAnswer.substring(intCharIndex, intCharIndex + 1).equalsIgnoreCase(strGuess)) {
-							strHidden = strHidden.substring(0, intCharIndex) + strAnswer.substring(intCharIndex, intCharIndex + 1) + strHidden.substring(intCharIndex + 1);
-							blnCorrect = true;
-						}
-					}
+                attemptsLeft = wordToGuess.length();
+                con.println("Start guessing! You have " + attemptsLeft + " chances.");
 
-					if (blnCorrect) {
-						intPoints = intPoints + 10;
-						con.println("Correct!");
-					} else {
-						intTries = intTries - 1;
-						con.println("Wrong! Tries left: " + intTries);
-					}
-				}
+                while (attemptsLeft > 0 && guessedDisplay.contains("_")) {
+                    con.println("\nWord: " + guessedDisplay);
+                    con.print("Guess a letter: ");
+                    guessedLetter = con.readLine().toLowerCase();
 
-				if (strHidden.equalsIgnoreCase(strAnswer)) {
-					con.println("You win! The word was: " + strAnswer);
-				} else {
-					con.println("Game over! The word was: " + strAnswer);
-				}
+                    if (guessedLetter.length() != 1) {
+                        con.println("Please enter exactly one letter.");
+                        continue;
+                    }
 
-				// Leaderboard update
-				TextInputFile leaderIn = new TextInputFile("leaderboard.txt");
-				String[] strNames = new String[10];
-				int[] intScores = new int[10];
-				intCount = 0;
-				while (leaderIn.eof() == false && intCount < 10) {
-					strNames[intCount] = leaderIn.readLine();
-					intScores[intCount] = leaderIn.readInt();
-					intCount++;
-				}
-				leaderIn.close();
+                    letterFound = false;
+                    String updatedDisplay = "";
+                    for (int index = 0; index < wordToGuess.length(); index = index + 1) {
+                        if (wordToGuess.substring(index, index + 1).equals(guessedLetter)) {
+                            updatedDisplay = updatedDisplay + guessedLetter;
+                            letterFound = true;
+                        } else {
+                            updatedDisplay = updatedDisplay + guessedDisplay.substring(index, index + 1);
+                        }
+                    }
 
-				strNames[intCount] = strUser;
-				intScores[intCount] = intPoints;
-				intCount++;
+                    guessedDisplay = updatedDisplay;
 
-				// Bubble sort
-				for (int intOuter = 0; intOuter < intCount - 1; intOuter++) {
-					for (int intInner = 0; intInner < intCount - 1 - intOuter; intInner++) {
-						if (intScores[intInner] < intScores[intInner + 1]) {
-							int intTemp = intScores[intInner];
-							intScores[intInner] = intScores[intInner + 1];
-							intScores[intInner + 1] = intTemp;
-							String strTemp = strNames[intInner];
-							strNames[intInner] = strNames[intInner + 1];
-							strNames[intInner + 1] = strTemp;
-						}
-					}
-				}
+                    if (letterFound) {
+                        con.println("Nice! Letter found.");
+                    } else {
+                        attemptsLeft = attemptsLeft - 1;
+                        con.println("Wrong! Attempts left: " + attemptsLeft);
+                    }
+                }
 
-				TextOutputFile leaderOut = new TextOutputFile("leaderboard.txt");
-				for (int intLeaderIndex = 0; intLeaderIndex < 10 && strNames[intLeaderIndex] != null; intLeaderIndex++) {
-					leaderOut.println(strNames[intLeaderIndex]);
-					leaderOut.println(intScores[intLeaderIndex]);
-				}
-				leaderOut.close();
+                if (!guessedDisplay.contains("_")) {
+                    con.println("You win! The word was **" + wordToGuess + "**!");
+                } else {
+                    con.println("Game over. The word was **" + wordToGuess + "**.");
+                }
 
-			} else if (intMenuChoice == 2) 
-				// Display leaderboard
-	
+            } else if (userChoice.equals("2")) {
+                // VIEW LEADERBOARD
+                TextInputFile lbInput = new TextInputFile("leaderboard.txt");
+                con.println("\n=== LEADERBOARD ===");
+                while (!lbInput.eof()) {
+                    con.println(lbInput.readLine());
+                }
+                lbInput.close();
 
+            } else if (userChoice.equals("3")) {
+                // ADD THEME
+                con.print("Enter new theme name (no spaces): ");
+                themeName = con.readLine().trim();
 
+                TextOutputFile themeOutput = new TextOutputFile("themes.txt", true);
+                themeOutput.println(themeName);
+                themeOutput.close();
 
+                TextOutputFile newThemeFile = new TextOutputFile(themeName + ".txt");
+                con.println("Enter words for this theme (type 'done' when finished):");
+                while (true) {
+                    con.print("Add word: ");
+                    String newWord = con.readLine().toLowerCase().trim();
+                    if (newWord.equals("done")) break;
+                    if (newWord.length() >= 4) {
+                        newThemeFile.println(newWord);
+                    } else {
+                        con.println("Word too short (min 4 letters).");
+                    }
+                }
+                newThemeFile.close();
+                con.println("Theme '" + themeName + "' added.");
+
+            } else if (userChoice.equals("4")) {
+                con.println("Goodbye!");
+                break;
+
+            } else {
+                con.println("Invalid choice. Please enter 1–4.");
+            }
+        }
+    }
 }
